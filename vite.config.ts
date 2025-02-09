@@ -23,6 +23,10 @@ export default mergeConfig(
         reportsDirectory: './.coverage',
         reporter: ['lcov', 'json', 'json-summary'],
       },
+      fakeTimers: {
+        shouldAdvanceTime: true,
+        toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'Date'],
+      },
     },
   })
 );

@@ -1,5 +1,5 @@
 import { ChakraProvider } from '@chakra-ui/react';
-import { render, screen, within, act } from '@testing-library/react';
+import { act, render, screen, within } from '@testing-library/react';
 import { UserEvent, userEvent } from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { ReactElement } from 'react';
@@ -178,11 +178,11 @@ describe('일정 뷰', () => {
 describe('검색 기능', () => {
   beforeEach(() => {
     server.use(
-      http.get('/api/events', () => {
-        return HttpResponse.json({
+      http.get('/api/events', () =>
+        HttpResponse.json({
           events: [
             {
-              id: 1,
+              id: '1',
               title: '팀 회의',
               date: '2024-10-15',
               startTime: '09:00',
@@ -194,7 +194,7 @@ describe('검색 기능', () => {
               notificationTime: 10,
             },
             {
-              id: 2,
+              id: '2',
               title: '프로젝트 계획',
               date: '2024-10-16',
               startTime: '14:00',
@@ -206,8 +206,8 @@ describe('검색 기능', () => {
               notificationTime: 10,
             },
           ],
-        });
-      })
+        })
+      )
     );
   });
 

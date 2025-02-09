@@ -40,11 +40,11 @@ import {
 } from '@chakra-ui/react';
 import { useRef, useState } from 'react';
 
-import { useCalendarView } from './hooks/useCalendarView.ts';
-import { useEventForm } from './hooks/useEventForm.ts';
-import { useEventOperations } from './hooks/useEventOperations.ts';
-import { useNotifications } from './hooks/useNotifications.ts';
-import { useSearch } from './hooks/useSearch.ts';
+import { useCalendarView } from './hooks/useCalendarView';
+import { useEventForm } from './hooks/useEventForm';
+import { useEventOperations } from './hooks/useEventOperations';
+import { useNotifications } from './hooks/useNotifications';
+import { useSearch } from './hooks/useSearch';
 import { Event, EventForm, RepeatType } from './types';
 import {
   formatDate,
