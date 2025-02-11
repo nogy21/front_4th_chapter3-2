@@ -50,3 +50,28 @@ it('반복 종료일이 지정되어 있고, 종료일 이후의 이벤트는 �
   expect(repeatEvents[0].date).toBe('2024-01-01');
   expect(repeatEvents[1].date).toBe('2024-01-02');
 });
+
+it('윤년 2월 29일 이벤트 생성 시 윤년마다 이벤트가 생성된다.', () => {
+  const event: Event = {
+    id: '1',
+    title: 'test',
+    date: '2024-02-29',
+    startTime: '10:00',
+    endTime: '11:00',
+    description: 'test',
+    location: 'test',
+    category: 'test',
+    repeat: {
+      type: 'yearly',
+      interval: 1,
+    },
+    notificationTime: 10,
+  };
+
+  const repeatEvents = createRepeatEvents(event);
+
+  expect(repeatEvents.length).toBe(2);
+  expect(repeatEvents[0].date).toBe('2024-02-29');
+  expect(repeatEvents[1].date).not.toBe('2025-02-28');
+  expect(repeatEvents[1].date).toBe('2027-02-29');
+});
