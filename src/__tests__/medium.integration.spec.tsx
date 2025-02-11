@@ -86,7 +86,7 @@ describe('일정 CRUD 및 기본 기능', () => {
     setupMockHandlerUpdating();
 
     await user.click(await screen.findByLabelText('Edit event'));
-    await user.click(await screen.findByRole('checkbox', { name: '반복 설정' }));
+    await user.click(await screen.findByLabelText('반복 설정'));
 
     await user.clear(screen.getByLabelText('제목'));
     await user.type(screen.getByLabelText('제목'), '수정된 회의');
