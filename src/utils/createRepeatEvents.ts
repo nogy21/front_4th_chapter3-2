@@ -1,6 +1,36 @@
 import { Event, RepeatType } from '../types';
 import { formatDate } from './dateUtils';
 
+// baseDate가 31일인 경우, n번째 31일이 있는 달의 31일 날짜를 반환하는 헬퍼 함수
+const getNthMonthWith31 = (baseDate: Date, n: number): Date => {
+  let year = baseDate.getFullYear();
+  let month = baseDate.getMonth();
+  let count = 0;
+  // n번째 31일이 존재하는 달을 찾을 때까지 달을 증가시킨다.
+  while (count < n) {
+    month++;
+    if (month > 11) {
+      year += Math.floor(month / 12);
+      month = month % 12;
+    }
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    // 해당 달에 31일이 존재하면 count 증가
+    if (daysInMonth >= 31) {
+      count++;
+    }
+  }
+  return new Date(year, month, 31);
+};
+
+const getNextMonth = (baseDate: Date, n: number): Date => {
+  const nextMonth = baseDate.getMonth() + n;
+  if (nextMonth > 11) {
+    baseDate.setFullYear(baseDate.getFullYear() + Math.floor(nextMonth / 12));
+  }
+  baseDate.setMonth(nextMonth);
+  return baseDate;
+};
+
 const isLeapYear = (year: number): boolean =>
   (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
 
@@ -27,27 +57,9 @@ const getNextDate = (baseDate: Date, type: RepeatType, i: number): Date => {
       break;
     case 'monthly':
       if (baseDate.getDate() === 31) {
-        let month = baseDate.getMonth();
-        let year = baseDate.getFullYear();
-        let count = 0;
-        // 증가시켜서 i번째 31일이 존재하는 달을 찾는다.
-        while (count < i) {
-          month++;
-          if (month > 11) {
-            year += Math.floor(month / 12);
-            month = month % 12;
-          }
-          const testDate = new Date(year, month, 31);
-          // testDate가 실제 해당 월의 31일이라면 count 증가
-          if (testDate.getMonth() === month && testDate.getDate() === 31) {
-            count++;
-          }
-        }
-        return new Date(year, month, 31);
-      } else {
-        newDate.setMonth(newDate.getMonth() + i);
+        return getNthMonthWith31(baseDate, i);
       }
-      break;
+      return getNextMonth(baseDate, i);
     case 'yearly':
       // 윤년 처리
       if (baseDate.getMonth() === 1 && baseDate.getDate() === 29) {
