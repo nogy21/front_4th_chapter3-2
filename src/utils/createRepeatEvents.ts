@@ -26,7 +26,27 @@ const getNextDate = (baseDate: Date, type: RepeatType, i: number): Date => {
       newDate.setDate(newDate.getDate() + i * 7);
       break;
     case 'monthly':
-      newDate.setMonth(newDate.getMonth() + i);
+      if (baseDate.getDate() === 31) {
+        let month = baseDate.getMonth();
+        let year = baseDate.getFullYear();
+        let count = 0;
+        // 증가시켜서 i번째 31일이 존재하는 달을 찾는다.
+        while (count < i) {
+          month++;
+          if (month > 11) {
+            year += Math.floor(month / 12);
+            month = month % 12;
+          }
+          const testDate = new Date(year, month, 31);
+          // testDate가 실제 해당 월의 31일이라면 count 증가
+          if (testDate.getMonth() === month && testDate.getDate() === 31) {
+            count++;
+          }
+        }
+        return new Date(year, month, 31);
+      } else {
+        newDate.setMonth(newDate.getMonth() + i);
+      }
       break;
     case 'yearly':
       // 윤년 처리

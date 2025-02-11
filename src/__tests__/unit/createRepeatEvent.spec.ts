@@ -88,15 +88,22 @@ it('매월 31일 이벤트 생성 시 31일이 존재하는 달에 이벤트가 
     category: 'test',
     repeat: {
       type: 'monthly',
-      interval: 1,
+      interval: 5,
     },
     notificationTime: 10,
   };
 
   const repeatEvents = createRepeatEvents(event);
 
-  expect(repeatEvents.length).toBe(2);
+  expect(repeatEvents.length).toBe(6);
   expect(repeatEvents[0].date).toBe('2024-01-31');
   expect(repeatEvents[1].date).not.toBe('2024-02-29');
   expect(repeatEvents[1].date).toBe('2024-03-31');
+  expect(repeatEvents[2].date).not.toBe('2024-04-30');
+  expect(repeatEvents[2].date).toBe('2024-05-31');
+  expect(repeatEvents[3].date).not.toBe('2024-06-30');
+  expect(repeatEvents[3].date).toBe('2024-07-31');
+  expect(repeatEvents[4].date).toBe('2024-08-31');
+  expect(repeatEvents[5].date).not.toBe('2024-09-30');
+  expect(repeatEvents[5].date).toBe('2024-10-31');
 });
