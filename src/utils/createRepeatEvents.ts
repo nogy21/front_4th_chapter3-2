@@ -25,7 +25,7 @@ export const createRepeatEvents = (event: Event): Event[] => {
   // 반복 정보가 없거나 반복 타입이 'none'이면 빈 배열 반환
   if (!event.repeat || event.repeat.type === 'none') return [];
 
-  const { type, interval } = event.repeat;
+  const { type, interval, endDate } = event.repeat;
   const baseDate = new Date(event.date);
 
   // 원래 일정 포함 + 추가 반복: 예를 들어 interval이 1이면 두 개의 이벤트(원래 일정 + 1회 반복)를 생성
@@ -34,5 +34,5 @@ export const createRepeatEvents = (event: Event): Event[] => {
     date: formatDate(getNextDate(baseDate, type, i)),
   }));
 
-  return repeatEvents;
+  return endDate ? repeatEvents.filter((event) => event.date <= endDate) : repeatEvents;
 };
