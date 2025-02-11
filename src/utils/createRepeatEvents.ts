@@ -1,5 +1,5 @@
 import { Event, RepeatType } from '../types';
-import { formatDate } from './dateUtils';
+import { formatDate, getDaysInMonth } from './dateUtils';
 
 // 반복 타입에 따라 다음 날짜를 계산하는 헬퍼 함수
 const getNextDate = (baseDate: Date, type: RepeatType, i: number): Date => {
@@ -15,7 +15,12 @@ const getNextDate = (baseDate: Date, type: RepeatType, i: number): Date => {
       newDate.setMonth(newDate.getMonth() + i);
       break;
     case 'yearly':
-      newDate.setFullYear(newDate.getFullYear() + i);
+      // 윤년 처리
+      if (getDaysInMonth(newDate.getFullYear() + i, newDate.getMonth()) === 29) {
+        newDate.setFullYear(newDate.getFullYear() + i * 4);
+      } else {
+        getNextDate(newDate, type, i + 1);
+      }
       break;
   }
   return newDate;
