@@ -73,5 +73,30 @@ it('윤년 2월 29일 이벤트 생성 시 윤년마다 이벤트가 생성된�
   expect(repeatEvents.length).toBe(2);
   expect(repeatEvents[0].date).toBe('2024-02-29');
   expect(repeatEvents[1].date).not.toBe('2025-02-28');
-  expect(repeatEvents[1].date).toBe('2027-02-29');
+  expect(repeatEvents[1].date).toBe('2028-02-29');
+});
+
+it('매월 31일 이벤트 생성 시 31일이 존재하는 달에 이벤트가 생성된다.', () => {
+  const event: Event = {
+    id: '1',
+    title: 'test',
+    date: '2024-01-31',
+    startTime: '10:00',
+    endTime: '11:00',
+    description: 'test',
+    location: 'test',
+    category: 'test',
+    repeat: {
+      type: 'monthly',
+      interval: 1,
+    },
+    notificationTime: 10,
+  };
+
+  const repeatEvents = createRepeatEvents(event);
+
+  expect(repeatEvents.length).toBe(2);
+  expect(repeatEvents[0].date).toBe('2024-01-31');
+  expect(repeatEvents[1].date).not.toBe('2024-02-29');
+  expect(repeatEvents[1].date).toBe('2024-03-31');
 });
