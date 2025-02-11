@@ -1,5 +1,19 @@
 import { Event, RepeatType } from '../types';
-import { formatDate, getDaysInMonth } from './dateUtils';
+import { formatDate } from './dateUtils';
+
+const isLeapYear = (year: number): boolean =>
+  (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+
+const getNextLeapYear = (year: number, i: number): number => {
+  let leapCount = 0;
+  // i번째 다음 윤년을 찾는다.
+  while (leapCount < i) {
+    if (isLeapYear(++year)) {
+      leapCount++;
+    }
+  }
+  return year;
+};
 
 // 반복 타입에 따라 다음 날짜를 계산하는 헬퍼 함수
 const getNextDate = (baseDate: Date, type: RepeatType, i: number): Date => {
@@ -16,10 +30,12 @@ const getNextDate = (baseDate: Date, type: RepeatType, i: number): Date => {
       break;
     case 'yearly':
       // 윤년 처리
-      if (getDaysInMonth(newDate.getFullYear() + i, newDate.getMonth()) === 29) {
-        newDate.setFullYear(newDate.getFullYear() + i * 4);
+      if (baseDate.getMonth() === 1 && baseDate.getDate() === 29) {
+        const nextLeapYear = getNextLeapYear(baseDate.getFullYear(), i);
+        newDate.setFullYear(nextLeapYear);
       } else {
-        getNextDate(newDate, type, i + 1);
+        // 2월 29일이 아니면 일반적으로 i년을 더한다.
+        newDate.setFullYear(newDate.getFullYear() + i);
       }
       break;
   }
