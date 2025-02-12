@@ -103,6 +103,31 @@ describe('일정 CRUD 및 기본 기능', () => {
     expect(eventList.getByText('회의 내용 변경')).toBeInTheDocument();
   });
 
+  it('반복 일정을 수정할 경우 단일 일정으로 변경된다.', async () => {
+    setupMockHandlerUpdating();
+    const { user } = setup(<App />);
+    await act(async () => null);
+
+    // 기존 반복 일정 2개
+    const eventList = within(screen.getByTestId('event-list'));
+    const repeatTexts = await eventList.getAllByText(/반복:\s*/);
+    expect(repeatTexts.length).toBe(2);
+
+    // 마지막 반복 일정 수정 버튼 클릭
+    const editButtons = await eventList.findAllByRole('button', { name: /Edit event/ });
+    await user.click(editButtons[editButtons.length - 1]);
+
+    // 반복 일정 수정
+    await user.clear(screen.getByLabelText('제목'));
+    await user.type(screen.getByLabelText('제목'), '수정된 반복 일정');
+    await user.click(screen.getByTestId('event-submit-button'));
+
+    // 수정된 반복 일정 확인
+    const updatedEventList = within(screen.getByTestId('event-list'));
+    expect(updatedEventList.getByText('수정된 반복 일정')).toBeInTheDocument();
+    expect(updatedEventList.getAllByText(/반복:\s*/)).toHaveLength(1);
+  });
+
   it('일정을 삭제하고 더 이상 조회되지 않는지 확인한다', async () => {
     setupMockHandlerDeletion();
 
