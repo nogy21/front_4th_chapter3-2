@@ -207,4 +207,35 @@ describe('반복 일정 기능', () => {
       { ...newEvent, date: '2024-01-02', id: '2', repeat: { ...newEvent.repeat, id: 'repeat-1' } },
     ]);
   });
+
+  it('반복 일정을 수정할 경우 단일 일정으로 변경된다.', async () => {
+    setupMockHandlerUpdating();
+
+    const { result } = renderHook(() => useEventOperations(true));
+
+    await act(() => Promise.resolve(null));
+
+    // 기존 일정 4개 (0, 1: 비반복, 2, 3: 반복)
+    expect(result.current.events.length).toBe(4);
+
+    const updatedEvent: Event = { ...result.current.events[2] };
+    updatedEvent.title = '수정된 반복 일정';
+    updatedEvent.date = '2025-02-12';
+
+    await act(async () => {
+      await result.current.saveEvent(updatedEvent);
+    });
+
+    expect(result.current.events.length).toBe(3);
+    expect(result.current.events[2]).toEqual(updatedEvent);
+    expect(result.current.events[2]).toEqual({
+      ...updatedEvent,
+      date: '2025-02-13',
+      id: '2',
+      repeat: {
+        type: 'none',
+        interval: 0,
+      },
+    });
+  });
 });
