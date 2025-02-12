@@ -53,7 +53,12 @@ export const useEventOperations = (editing: boolean, onSave?: () => void) => {
           ? fetch('/api/events-list', {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ events: eventData }),
+              body: JSON.stringify({
+                events: eventData.map((event) => ({
+                  ...event,
+                  repeat: { type: 'none', interval: 0 },
+                })),
+              }),
             })
           : fetch(`/api/events/${(eventData as Event).id}`, {
               method: 'PUT',
