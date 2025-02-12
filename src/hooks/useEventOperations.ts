@@ -1,8 +1,9 @@
 import { useToast } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 
-import { Event, EventForm } from '../types';
-import { createRepeatEvents } from '../utils/createRepeatEvents';
+import { createEvent, updateEvent } from '../apis/handleEvents';
+import { Event } from '../types';
+import { isSaving, type SaveEventData } from '../utils/eventValidation';
 
 export const useEventOperations = (editing: boolean, onSave?: () => void) => {
   const [events, setEvents] = useState<Event[]>([]);
@@ -27,48 +28,10 @@ export const useEventOperations = (editing: boolean, onSave?: () => void) => {
     }
   };
 
-  const saveEvent = async (eventData: Event | EventForm | Event[]) => {
+  const saveEvent = async (eventData: SaveEventData) => {
     try {
-      // 새 이벤트 저장 시
-      if (!editing && !Array.isArray(eventData)) {
-        if (eventData.repeat && eventData.repeat.type !== 'none') {
-          // 반복 이벤트인 경우 단일 이벤트 저장을 건너뛰고,
-          // 반복 이벤트 저장 엔드포인트에 바로 저장한다.
-          const repeatEvents = createRepeatEvents(eventData as Event);
-          await fetch('/api/events-list', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ events: repeatEvents }),
-          });
-        } else {
-          await fetch('/api/events', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(eventData),
-          });
-        }
-      } else {
-        // 편집 모드인 경우 PUT 방식으로 업데이트
-        const response = await (Array.isArray(eventData)
-          ? fetch('/api/events-list', {
-              method: 'PUT',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                events: eventData.map((event) => ({
-                  ...event,
-                  repeat: { type: 'none', interval: 0 },
-                })),
-              }),
-            })
-          : fetch(`/api/events/${(eventData as Event).id}`, {
-              method: 'PUT',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(eventData),
-            }));
-        if (!response.ok) {
-          throw new Error('Failed to update event');
-        }
-      }
+      // 이벤트 저장 or 수정
+      await (isSaving(editing, eventData) ? createEvent(eventData) : updateEvent(eventData));
 
       await fetchEvents();
 
