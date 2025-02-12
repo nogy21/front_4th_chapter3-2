@@ -231,6 +231,8 @@ describe('반복 일정 기능', () => {
 
     expect(result.current.events.length).toBe(4);
     expect(result.current.events[2]).toEqual(updatedEvent);
+    expect(result.current.events[2].repeat.type).toBe('none');
+    expect(result.current.events[2].repeat.interval).toBe(0);
     expect(result.current.events[3]).toEqual(repeatEvents[1]);
   });
 });
