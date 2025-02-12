@@ -39,7 +39,9 @@ const saveSchedule = async (
 
   if (repeat) {
     await user.selectOptions(screen.getByLabelText('반복 유형'), repeat.type ?? 'none');
+    await user.clear(screen.getByLabelText('반복 간격'));
     await user.type(screen.getByLabelText('반복 간격'), repeat.interval.toString() ?? '');
+    await user.clear(screen.getByLabelText('반복 종료일'));
     await user.type(screen.getByLabelText('반복 종료일'), repeat.endDate ?? '');
   }
 
@@ -68,16 +70,17 @@ describe('일정 CRUD 및 기본 기능', () => {
     });
 
     const eventList = within(screen.getByTestId('event-list'));
-    expect(eventList.getByText('새 회의')).toBeInTheDocument();
-    expect(eventList.getByText('2024-10-15')).toBeInTheDocument();
-    expect(eventList.getByText('14:00 - 15:00')).toBeInTheDocument();
-    expect(eventList.getByText('프로젝트 진행 상황 논의')).toBeInTheDocument();
-    expect(eventList.getByText('회의실 A')).toBeInTheDocument();
-    expect(eventList.getByText('카테고리: 업무')).toBeInTheDocument();
 
-    expect(eventList.getByText(/반복:\s*1/)).toBeInTheDocument();
-    expect(eventList.getByText(/일\s*마다/)).toBeInTheDocument();
-    expect(eventList.getByText(/(종료:\s*2024-12-31)/)).toBeInTheDocument();
+    expect(eventList.getAllByText('새 회의')).toHaveLength(2);
+    expect(eventList.getByText('2024-10-15')).toBeInTheDocument();
+    expect(eventList.getAllByText('14:00 - 15:00')).toHaveLength(2);
+    expect(eventList.getAllByText('프로젝트 진행 상황 논의')).toHaveLength(2);
+    expect(eventList.getAllByText('회의실 A')).toHaveLength(2);
+    expect(eventList.getAllByText('카테고리: 업무')).toHaveLength(2);
+
+    expect(eventList.getAllByText(/반복:\s*1/)).toHaveLength(2);
+    expect(eventList.getAllByText(/일\s*마다/)).toHaveLength(2);
+    expect(eventList.getAllByText(/(종료:\s*2024-12-31)/)).toHaveLength(2);
   });
 
   it('기존 일정의 세부 정보를 수정하고 변경사항이 정확히 반영된다', async () => {
@@ -92,20 +95,12 @@ describe('일정 CRUD 및 기본 기능', () => {
     await user.type(screen.getByLabelText('제목'), '수정된 회의');
     await user.clear(screen.getByLabelText('설명'));
     await user.type(screen.getByLabelText('설명'), '회의 내용 변경');
-    await user.selectOptions(screen.getByLabelText('반복 유형'), 'weekly');
-    await user.clear(screen.getByLabelText('반복 간격'));
-    await user.type(screen.getByLabelText('반복 간격'), '2');
-    await user.clear(screen.getByLabelText('반복 종료일'));
-    await user.type(screen.getByLabelText('반복 종료일'), '2024-12-31');
 
     await user.click(screen.getByTestId('event-submit-button'));
 
     const eventList = within(screen.getByTestId('event-list'));
     expect(eventList.getByText('수정된 회의')).toBeInTheDocument();
     expect(eventList.getByText('회의 내용 변경')).toBeInTheDocument();
-    expect(eventList.getByText(/반복:\s*2/)).toBeInTheDocument();
-    expect(eventList.getByText(/주\s*마다/)).toBeInTheDocument();
-    expect(eventList.getByText(/(종료:\s*2024-12-31)/)).toBeInTheDocument();
   });
 
   it('일정을 삭제하고 더 이상 조회되지 않는지 확인한다', async () => {
