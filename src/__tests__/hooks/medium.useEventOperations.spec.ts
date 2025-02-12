@@ -106,7 +106,7 @@ it('존재하는 이벤트 삭제 시 에러없이 아이템이 삭제된다.', 
 
   await act(() => Promise.resolve(null));
 
-  expect(result.current.events).toEqual([]);
+  expect(result.current.events.filter((event) => event.id === '1')).toEqual([]);
 });
 
 it("이벤트 로딩 실패 시 '이벤트 로딩 실패'라는 텍스트와 함께 에러 토스트가 표시되어야 한다", async () => {
@@ -235,5 +235,28 @@ describe('반복 일정 기능', () => {
       repeat: { type: 'none', interval: 0 },
     });
     expect(result.current.events[3]).toEqual(repeatEvents[1]);
+  });
+
+  it('반복 일정을 삭제하면 해당 반복 일정만 삭제되어야 한다', async () => {
+    setupMockHandlerDeletion();
+
+    const { result } = renderHook(() => useEventOperations(false));
+
+    await act(() => Promise.resolve(null));
+
+    // 반복 일정 2개, 반복 일정 id 동일
+    const repeatEvents = result.current.events.filter((event) => event.repeat.type !== 'none');
+    expect(repeatEvents.length).toBe(2);
+    expect(repeatEvents[0].repeat.id).toBe(repeatEvents[1].repeat.id);
+
+    await act(async () => {
+      await result.current.deleteEvent('2');
+    });
+
+    // 반복 일정 1개 남음
+    const afterDeleteRepeatEvents = result.current.events.filter(
+      (event) => event.repeat.type !== 'none'
+    );
+    expect(afterDeleteRepeatEvents.length).toBe(1);
   });
 });
