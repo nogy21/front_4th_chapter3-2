@@ -39,7 +39,7 @@ export const setupMockHandlerCreation = (initEvents = [] as Event[]) => {
 };
 
 export const setupMockHandlerUpdating = () => {
-  const mockEvents: Event[] = [
+  let mockEvents: Event[] = [
     {
       id: '1',
       title: '기존 회의',
@@ -64,6 +64,40 @@ export const setupMockHandlerUpdating = () => {
       repeat: { type: 'none', interval: 0 },
       notificationTime: 5,
     },
+    {
+      id: '3',
+      title: '반복 회의',
+      date: '2024-10-16',
+      startTime: '13:00',
+      endTime: '14:00',
+      description: '반복 회의',
+      location: '회의실 D',
+      category: '업무 회의',
+      repeat: {
+        type: 'daily',
+        interval: 1,
+        endDate: '2024-10-20',
+        id: 'repeat-1',
+      },
+      notificationTime: 10,
+    },
+    {
+      id: '4',
+      title: '반복 회의',
+      date: '2024-10-17',
+      startTime: '13:00',
+      endTime: '14:00',
+      description: '반복 회의',
+      location: '회의실 E',
+      category: '업무 회의',
+      repeat: {
+        type: 'daily',
+        interval: 1,
+        endDate: '2024-10-20',
+        id: 'repeat-2',
+      },
+      notificationTime: 10,
+    },
   ];
 
   server.use(
@@ -72,9 +106,28 @@ export const setupMockHandlerUpdating = () => {
       const { id } = params;
       const updatedEvent = (await request.json()) as Event;
       const index = mockEvents.findIndex((event) => event.id === id);
+      if (index === -1) {
+        return new HttpResponse(null, { status: 404 });
+      }
 
       mockEvents[index] = { ...mockEvents[index], ...updatedEvent };
       return HttpResponse.json(mockEvents[index]);
+    }),
+    http.put('/api/events-list', async ({ request }) => {
+      const { events: eventsToUpdate } = (await request.json()) as { events: Event[] };
+      const isUpdated = eventsToUpdate.some((event) => mockEvents.find((e) => e.id === event.id));
+
+      if (!isUpdated) {
+        return new HttpResponse(null, { status: 404 });
+      }
+
+      const updatedEvents = eventsToUpdate.map((event) => {
+        const update = mockEvents.find((e) => e.id === event.id);
+        return update ? { ...update, ...event } : event;
+      });
+
+      mockEvents = [...updatedEvents];
+      return HttpResponse.json(updatedEvents);
     })
   );
 };
