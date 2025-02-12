@@ -43,17 +43,20 @@ export const handlers = [
 
   http.put('/api/events-list', async ({ request }) => {
     const { events: eventsToUpdate } = (await request.json()) as { events: Event[] };
-    const isUpdated = eventsToUpdate.some((event) => events.find((e) => e.id === event.id));
-    if (!isUpdated) {
-      return new HttpResponse(null, { status: 404 });
-    }
 
-    const updatedEvents = eventsToUpdate.map((event) => {
-      const update = events.find((e) => e.id === event.id);
-      return update ? { ...update, ...event } : event;
+    let isUpdated = false;
+    eventsToUpdate.forEach((event) => {
+      const eventIndex = events.findIndex((e) => e.id === event.id);
+      if (eventIndex > -1) {
+        isUpdated = true;
+      }
     });
 
-    return HttpResponse.json(updatedEvents);
+    if (!isUpdated) {
+      return new HttpResponse('Event not found', { status: 404 });
+    }
+
+    return HttpResponse.json(events);
   }),
 
   http.delete('/api/events/:id', ({ params }) => {

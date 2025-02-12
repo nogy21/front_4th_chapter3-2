@@ -114,20 +114,24 @@ export const setupMockHandlerUpdating = () => {
       return HttpResponse.json(mockEvents[index]);
     }),
     http.put('/api/events-list', async ({ request }) => {
-      const { events: eventsToUpdate } = (await request.json()) as { events: Event[] };
-      const isUpdated = eventsToUpdate.some((event) => mockEvents.find((e) => e.id === event.id));
+      const { events } = (await request.json()) as { events: Event[] };
 
-      if (!isUpdated) {
-        return new HttpResponse(null, { status: 404 });
-      }
-
-      const updatedEvents = eventsToUpdate.map((event) => {
-        const update = mockEvents.find((e) => e.id === event.id);
-        return update ? { ...update, ...event } : event;
+      const newEvents = [...mockEvents];
+      let isUpdated = false;
+      events.forEach((event) => {
+        const eventIndex = mockEvents.findIndex((e) => e.id === event.id);
+        if (eventIndex > -1) {
+          isUpdated = true;
+          newEvents[eventIndex] = { ...mockEvents[eventIndex], ...event };
+        }
       });
 
-      mockEvents = [...updatedEvents];
-      return HttpResponse.json(updatedEvents);
+      if (!isUpdated) {
+        return new HttpResponse('Event not found', { status: 404 });
+      }
+
+      mockEvents = [...newEvents];
+      return HttpResponse.json(events);
     })
   );
 };
