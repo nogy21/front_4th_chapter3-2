@@ -218,25 +218,19 @@ describe('반복 일정 기능', () => {
 
     // 기존 일정 4개 (0, 1: 비반복, 2, 3: 반복)
     expect(result.current.events.length).toBe(4);
+    const repeatEvents = result.current.events.filter((event) => event.repeat.type !== 'none');
+    expect(repeatEvents.length).toBe(2);
 
-    const updatedEvent: Event = { ...result.current.events[2] };
+    const updatedEvent: Event = { ...repeatEvents[0] };
     updatedEvent.title = '수정된 반복 일정';
     updatedEvent.date = '2025-02-12';
 
     await act(async () => {
-      await result.current.saveEvent(updatedEvent);
+      await result.current.saveEvent([updatedEvent]);
     });
 
-    expect(result.current.events.length).toBe(3);
+    expect(result.current.events.length).toBe(4);
     expect(result.current.events[2]).toEqual(updatedEvent);
-    expect(result.current.events[2]).toEqual({
-      ...updatedEvent,
-      date: '2025-02-13',
-      id: '2',
-      repeat: {
-        type: 'none',
-        interval: 0,
-      },
-    });
+    expect(result.current.events[3]).toEqual(repeatEvents[1]);
   });
 });

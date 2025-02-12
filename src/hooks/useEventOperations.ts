@@ -27,10 +27,10 @@ export const useEventOperations = (editing: boolean, onSave?: () => void) => {
     }
   };
 
-  const saveEvent = async (eventData: Event | EventForm) => {
+  const saveEvent = async (eventData: Event | EventForm | Event[]) => {
     try {
       // 새 이벤트 저장 시
-      if (!editing) {
+      if (!editing && !Array.isArray(eventData)) {
         if (eventData.repeat && eventData.repeat.type !== 'none') {
           // 반복 이벤트인 경우 단일 이벤트 저장을 건너뛰고,
           // 반복 이벤트 저장 엔드포인트에 바로 저장한다.
@@ -49,11 +49,20 @@ export const useEventOperations = (editing: boolean, onSave?: () => void) => {
         }
       } else {
         // 편집 모드인 경우 PUT 방식으로 업데이트
-        await fetch(`/api/events/${(eventData as Event).id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(eventData),
-        });
+        const response = await (Array.isArray(eventData)
+          ? fetch('/api/events-list', {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ events: eventData }),
+            })
+          : fetch(`/api/events/${(eventData as Event).id}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(eventData),
+            }));
+        if (!response.ok) {
+          throw new Error('Failed to update event');
+        }
       }
 
       await fetchEvents();
