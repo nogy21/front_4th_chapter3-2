@@ -20,23 +20,21 @@ export const createEvent = async (eventData: Event | EventForm) => {
   });
 };
 
-export const updateEvent = async (eventData: SaveEventData) => {
-  const response = await (Array.isArray(eventData)
-    ? fetch('/api/events-list', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          events: eventData.map((event) => ({
-            ...event,
-            repeat: { type: 'none', interval: 0 },
-          })),
-        }),
-      })
-    : fetch(`/api/events/${(eventData as Event).id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(eventData),
-      }));
+export const updateEvent = async (eventData: SaveEventData, isRepeat: boolean) => {
+  // 반복 일정 여부에 따라 전달할 데이터 형식 변경
+  const data = isRepeat
+    ? {
+        ...eventData,
+        repeat: { type: 'none', interval: 0 },
+      }
+    : eventData;
+
+  const response = await fetch(`/api/events/${(eventData as Event).id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+
   if (!response.ok) {
     throw new Error('Failed to update event');
   }

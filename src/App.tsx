@@ -161,7 +161,7 @@ function App() {
       setOverlappingEvents(overlapping);
       setIsOverlapDialogOpen(true);
     } else {
-      await saveEvent(editingEvent && isRepeating ? [eventData as Event] : eventData);
+      await saveEvent(eventData);
       resetForm();
     }
   };

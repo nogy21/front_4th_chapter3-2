@@ -2,8 +2,8 @@ import { useToast } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 
 import { createEvent, updateEvent } from '../apis/handleEvents';
-import { Event } from '../types';
-import { isSaving, type SaveEventData } from '../utils/eventValidation';
+import { Event, EventForm } from '../types';
+import { isRepeating } from '../utils/eventValidation';
 
 export const useEventOperations = (editing: boolean, onSave?: () => void) => {
   const [events, setEvents] = useState<Event[]>([]);
@@ -28,10 +28,10 @@ export const useEventOperations = (editing: boolean, onSave?: () => void) => {
     }
   };
 
-  const saveEvent = async (eventData: SaveEventData) => {
+  const saveEvent = async (eventData: Event | EventForm) => {
     try {
       // 이벤트 저장 or 수정
-      await (isSaving(editing, eventData) ? createEvent(eventData) : updateEvent(eventData));
+      await (editing ? updateEvent(eventData, isRepeating(eventData)) : createEvent(eventData));
 
       await fetchEvents();
 

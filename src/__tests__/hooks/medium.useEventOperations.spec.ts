@@ -226,7 +226,7 @@ describe('반복 일정 기능', () => {
     updatedEvent.date = '2025-02-12';
 
     await act(async () => {
-      await result.current.saveEvent([updatedEvent]);
+      await result.current.saveEvent(updatedEvent);
     });
 
     expect(result.current.events.length).toBe(4);
