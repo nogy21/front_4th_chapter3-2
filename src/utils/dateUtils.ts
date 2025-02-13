@@ -1,4 +1,4 @@
-import { Event } from '../types';
+import { Event, RepeatType } from '../types';
 
 /**
  * 주어진 년도와 월의 일수를 반환합니다.
@@ -108,3 +108,116 @@ export function formatDate(currentDate: Date, day?: number) {
     fillZero(day ?? currentDate.getDate()),
   ].join('-');
 }
+
+// baseDate가 31일인 경우, n번째 31일이 있는 달의 31일 날짜를 반환하는 헬퍼 함수
+const getNthMonthWith31 = (baseDate: Date, n: number): Date => {
+  let year = baseDate.getFullYear();
+  let month = baseDate.getMonth();
+  let count = 0;
+  // n번째 31일이 존재하는 달을 찾을 때까지 달을 증가시킨다.
+  while (count < n) {
+    month++;
+    if (month > 11) {
+      year += Math.floor(month / 12);
+      month = month % 12;
+    }
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    // 해당 달에 31일이 존재하면 count 증가
+    if (daysInMonth >= 31) {
+      count++;
+    }
+  }
+  return new Date(year, month, 31);
+};
+
+const getNextMonth = (baseDate: Date, n: number): Date => {
+  const nextMonth = baseDate.getMonth() + n;
+  if (nextMonth > 11) {
+    baseDate.setFullYear(baseDate.getFullYear() + Math.floor(nextMonth / 12));
+  }
+  baseDate.setMonth(nextMonth);
+  return baseDate;
+};
+
+const isLeapYear = (year: number): boolean =>
+  (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+
+const getNextLeapYear = (year: number, i: number): number => {
+  let leapCount = 0;
+  // i번째 다음 윤년을 찾는다.
+  while (leapCount < i) {
+    if (isLeapYear(++year)) {
+      leapCount++;
+    }
+  }
+  return year;
+};
+
+/**
+ * 반복 타입에 따라 다음 날짜를 계산한다.
+ * @param baseDate 시작 날짜
+ * @param type 반복 타입
+ * @param interval 반복 횟수
+ * @returns 다음 날짜
+ */
+export const getNextDate = (baseDate: Date, type: RepeatType, interval: number): Date => {
+  const newDate = new Date(baseDate);
+  switch (type) {
+    case 'daily':
+      newDate.setDate(newDate.getDate() + interval);
+      break;
+    case 'weekly':
+      newDate.setDate(newDate.getDate() + interval * 7);
+      break;
+    case 'monthly':
+      if (baseDate.getDate() === 31) {
+        return getNthMonthWith31(baseDate, interval);
+      }
+      return getNextMonth(baseDate, interval);
+    case 'yearly':
+      // 윤년 처리
+      if (baseDate.getMonth() === 1 && baseDate.getDate() === 29) {
+        const nextLeapYear = getNextLeapYear(baseDate.getFullYear(), interval);
+        newDate.setFullYear(nextLeapYear);
+      } else {
+        // 2월 29일이 아니면 일반적으로 i년을 더한다.
+        newDate.setFullYear(newDate.getFullYear() + interval);
+      }
+      break;
+  }
+  return newDate;
+};
+
+export const MAX_REPEAT_DATE = '2025-06-30';
+const DAY_IN_SECONDS = 1000 * 60 * 60 * 24;
+
+/**
+ * 반복 타입에 따라 반복 횟수를 계산한다.
+ * @param type 반복 타입
+ * @param baseDate 시작 날짜
+ * @param endDate 종료 날짜
+ * @returns 반복 횟수
+ */
+export const getRepeatCount = (type: RepeatType, baseDate: Date, endDate: string): number => {
+  const start = new Date(baseDate);
+  const end = new Date(
+    `${new Date(endDate).getTime() > new Date(MAX_REPEAT_DATE).getTime() ? MAX_REPEAT_DATE : endDate}T23:59:59.000Z`
+  );
+
+  const timeDiff = end.getTime() - start.getTime();
+  const monthDiff = end.getMonth() - start.getMonth();
+  const yearDiff = end.getFullYear() - start.getFullYear();
+
+  switch (type) {
+    case 'daily':
+      return Math.floor(timeDiff / DAY_IN_SECONDS);
+    case 'weekly':
+      return Math.floor(timeDiff / (DAY_IN_SECONDS * 7));
+    case 'monthly':
+      return yearDiff * 12 + monthDiff;
+    case 'yearly':
+      return yearDiff;
+    default:
+      return 1;
+  }
+};
