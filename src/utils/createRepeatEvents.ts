@@ -74,17 +74,45 @@ const getNextDate = (baseDate: Date, type: RepeatType, i: number): Date => {
   return newDate;
 };
 
+const MAX_REPEAT_DATE = '2025-06-30';
+const DAY_IN_SECONDS = 1000 * 60 * 60 * 24;
+
 export const createRepeatEvents = (event: Event): Event[] => {
   // 반복 정보가 없거나 반복 타입이 'none'이면 빈 배열 반환
   if (!event.repeat || event.repeat.type === 'none') return [];
 
-  const { type, interval, endDate } = event.repeat;
+  const { type, interval, endDate = MAX_REPEAT_DATE } = event.repeat;
   const baseDate = new Date(event.date);
 
-  // 원래 일정 포함 + 추가 반복: 예를 들어 interval이 1이면 두 개의 이벤트(원래 일정 + 1회 반복)를 생성
-  const repeatEvents = Array.from({ length: interval + 1 }, (_, i) => ({
+  const start = new Date(event.date);
+  const end = new Date(
+    `${new Date(endDate).getTime() > new Date(MAX_REPEAT_DATE).getTime() ? MAX_REPEAT_DATE : endDate}T23:59:59.000Z`
+  );
+
+  let length;
+
+  switch (type) {
+    case 'daily':
+      length = Math.floor((end.getTime() - start.getTime()) / DAY_IN_SECONDS);
+      break;
+    case 'weekly':
+      length = Math.floor((end.getTime() - start.getTime()) / (DAY_IN_SECONDS * 7));
+      break;
+    case 'monthly':
+      length = (end.getFullYear() - start.getFullYear()) * 12 + end.getMonth() - start.getMonth();
+      break;
+    case 'yearly':
+      length = end.getFullYear() - start.getFullYear();
+      break;
+    default:
+      length = 1;
+      break;
+  }
+
+  // 원래 일정 포함 + 추가 반복: 예를 들어 interval이 1이고 endDate가 3일 뒤라면 원래 일정 + 3일 반복 일정 생성
+  const repeatEvents = Array.from({ length }, (_, i) => ({
     ...event,
-    date: formatDate(getNextDate(baseDate, type, i)),
+    date: formatDate(getNextDate(baseDate, type, i * interval)),
   }));
 
   return endDate ? repeatEvents.filter((event) => event.date <= endDate) : repeatEvents;

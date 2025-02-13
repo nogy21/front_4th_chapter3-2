@@ -65,7 +65,7 @@ describe('일정 CRUD 및 기본 기능', () => {
       repeat: {
         type: 'daily',
         interval: 1,
-        endDate: '2024-12-31',
+        endDate: '2024-10-17',
       },
     });
 
@@ -80,7 +80,7 @@ describe('일정 CRUD 및 기본 기능', () => {
 
     expect(eventList.getAllByText(/반복:\s*1/)).toHaveLength(2);
     expect(eventList.getAllByText(/일\s*마다/)).toHaveLength(2);
-    expect(eventList.getAllByText(/(종료:\s*2024-12-31)/)).toHaveLength(2);
+    expect(eventList.getAllByText(/(종료:\s*2024-10-17)/)).toHaveLength(2);
   });
 
   it('기존 일정의 세부 정보를 수정하고 변경사항이 정확히 반영된다', async () => {

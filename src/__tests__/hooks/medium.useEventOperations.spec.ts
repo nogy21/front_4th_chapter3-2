@@ -195,7 +195,7 @@ describe('반복 일정 기능', () => {
       description: '반복 일정',
       location: '회의실 A',
       category: '업무',
-      repeat: { type: 'daily', interval: 1 },
+      repeat: { type: 'daily', interval: 1, endDate: '2024-01-03' },
       notificationTime: 5,
     };
 
