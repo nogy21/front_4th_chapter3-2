@@ -209,6 +209,38 @@ describe('반복 일정 기능', () => {
     ]);
   });
 
+  it('매일 3회 반복 일정 저장 시 3일마다 일정이 생성된다. (반복 일정 저장 시 반복 횟수에 따라 일정이 생성된다)', async () => {
+    setupMockHandlerCreation();
+
+    const { result } = renderHook(() => useEventOperations(false));
+
+    await act(() => Promise.resolve(null));
+
+    const newEvent: Event = {
+      id: '1',
+      title: '반복 일정',
+      date: '2024-01-01',
+      startTime: '10:00',
+      endTime: '11:00',
+      description: '반복 일정',
+      location: '회의실 A',
+      category: '업무',
+      repeat: { type: 'daily', interval: 3, endDate: '2024-01-11' },
+      notificationTime: 5,
+    };
+
+    await act(async () => {
+      await result.current.saveEvent(newEvent);
+    });
+
+    expect(result.current.events).toEqual([
+      { ...newEvent, id: '1', repeat: { ...newEvent.repeat, id: 'repeat-1' } },
+      { ...newEvent, date: '2024-01-04', id: '2', repeat: { ...newEvent.repeat, id: 'repeat-1' } },
+      { ...newEvent, date: '2024-01-07', id: '3', repeat: { ...newEvent.repeat, id: 'repeat-1' } },
+      { ...newEvent, date: '2024-01-10', id: '4', repeat: { ...newEvent.repeat, id: 'repeat-1' } },
+    ]);
+  });
+
   it('반복 일정을 수정할 경우 단일 일정으로 변경된다.', async () => {
     setupMockHandlerUpdating();
 
