@@ -561,7 +561,7 @@ function App() {
                     location,
                     category,
                     repeat: {
-                      type: isRepeating ? repeatType : 'none',
+                      type: isRepeating ? (repeatType ?? 'daily') : 'none',
                       interval: repeatInterval,
                       endDate: repeatEndDate || undefined,
                     },

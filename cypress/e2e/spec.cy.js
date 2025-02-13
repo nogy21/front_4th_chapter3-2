@@ -75,7 +75,7 @@ describe('필수 기능 테스트', () => {
     getInputByLabel('시작 시간').type('10:00');
     getInputByLabel('종료 시간').type('11:00');
     getInputByLabel('설명').type('반복 테스트 일정 설명');
-    getInputByLabel('반복 유형').select('weekly').select('daily');
+    getInputByLabel('반복 유형').select('daily');
     cy.get('label').contains('반복 종료일').type('2025-02-19');
     cy.get('button').contains('일정 추가').click();
   });
